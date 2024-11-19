@@ -1,4 +1,3 @@
-version: '3'
 services:
 
     # Redis Service
@@ -37,19 +36,19 @@ services:
       build:
         context: php-fpm
         dockerfile: Dockerfile74
-        container_name: php
-        working_dir: /apps
-        restart: unless-stopped
-        tty: true
-        volumes:
-            - ../:/apps/
-            - ./docker/php/php-ini-overrides.ini:/usr/local/etc/php/conf.d/local.ini
-            - ./docker/php/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
-        environment:
-            SERVICE_NAME: app
-            SERVICE_TAGS: dev
-        networks:
-            - app-network
+      container_name: php
+      working_dir: /apps
+      restart: unless-stopped
+      tty: true
+      volumes:
+        - ../:/apps/
+        - ./php-fpm/php-ini-overrides.ini:/usr/local/etc/php/conf.d/local.ini
+        - ./php-fpm/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+      environment:
+        SERVICE_NAME: app
+        SERVICE_TAGS: dev
+      networks:
+        - app-network
 
     # Nginx Service
     nginx:
@@ -59,7 +58,7 @@ services:
         tty: true
         volumes:
             - ../:/apps/
-            - ./nginx/nginx/conf.d/:/etc/nginx/conf.d/
+            - ./nginx/conf.d/:/etc/nginx/conf.d/
         ports:
             - "80:80"
             - "443:443"
