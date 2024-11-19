@@ -1,0 +1,77 @@
+version: '3'
+services:
+
+    # Redis Service
+    redis:
+      image: 'redis:alpine'
+      container_name: redis
+      ports:
+          - "6379:6379"
+      command: redis-server --requirepass dk2v1TB%W|LfQS4_Cy6
+      networks:
+          - app-network
+
+    # MySQL Service
+    db:
+      image: mysql:8.2.0
+      container_name: db
+      restart: unless-stopped
+      tty: true
+      ports:
+          - "3306:3306"
+      volumes:
+          - dbdata:/var/lib/mysql
+          - ./mysql/my.cnf:/etc/mysql/my.cnf
+      environment:
+          MYSQL_DATABASE: db_app
+          MYSQL_ROOT_PASSWORD: MRy7nzO7UkKx4br
+          MYSQL_USER: php_app
+          MYSQL_PASSWORD: 123456
+          SERVICE_TAGS: dev
+          SERVICE_NAME: mysql
+      networks:
+          - app-network
+
+    # PHP Service
+    php:
+      build:
+        context: php-fpm
+        dockerfile: Dockerfile74
+        container_name: php
+        working_dir: /apps
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ../:/apps/
+            - ./docker/php/php-ini-overrides.ini:/usr/local/etc/php/conf.d/local.ini
+            - ./docker/php/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+        environment:
+            SERVICE_NAME: app
+            SERVICE_TAGS: dev
+        networks:
+            - app-network
+
+    # Nginx Service
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ../:/apps/
+            - ./nginx/nginx/conf.d/:/etc/nginx/conf.d/
+        ports:
+            - "80:80"
+            - "443:443"
+        networks:
+            - app-network
+
+#Docker Networks
+networks:
+    app-network:
+        driver: bridge
+
+#Volumes
+volumes:
+    dbdata:
+        driver: local
